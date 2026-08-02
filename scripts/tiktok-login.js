@@ -2,28 +2,51 @@
 // A Lyss nunca vê nem guarda sua senha — só a sessão já autenticada
 // (cookies), salva em tiktok-session.json (fora do git).
 //
+// O script detecta sozinho quando o login terminou (procurando o cookie
+// de sessão do TikTok) e fecha o navegador — não precisa voltar aqui
+// pra apertar nada.
+//
 // Rode: npm run tiktok:login
 
 import { chromium } from "playwright";
 import path from "node:path";
 
 const SESSION_PATH = path.resolve(import.meta.dirname, "..", "tiktok-session.json");
+const TIMEOUT_MS = 5 * 60 * 1000;
+const SESSION_COOKIE_NAMES = ["sessionid", "sid_tt", "sessionid_ss"];
+
+async function waitForLogin(context) {
+  const start = Date.now();
+  while (Date.now() - start < TIMEOUT_MS) {
+    const cookies = await context.cookies("https://www.tiktok.com");
+    if (cookies.some((c) => SESSION_COOKIE_NAMES.includes(c.name) && c.value)) {
+      return true;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  return false;
+}
 
 async function main() {
-  console.log("Abrindo o navegador. Faça login normalmente na sua conta do TikTok.");
-  console.log("Quando terminar e a timeline carregar, volte aqui e aperte Enter.\n");
+  console.log("Abrindo o navegador — faça login normalmente na sua conta do TikTok.");
+  console.log("Assim que o login terminar, o script detecta sozinho e fecha tudo.\n");
 
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("https://www.tiktok.com/login");
 
-  await new Promise((resolve) => {
-    process.stdin.once("data", resolve);
-  });
+  const loggedIn = await waitForLogin(context);
 
+  if (!loggedIn) {
+    console.log("\nTempo esgotado (5 min) sem detectar login. Rode de novo quando quiser tentar.");
+    await browser.close();
+    process.exit(1);
+  }
+
+  await new Promise((r) => setTimeout(r, 1500)); // deixa os cookies assentarem
   await context.storageState({ path: SESSION_PATH });
-  console.log(`\nSessão salva em ${SESSION_PATH}. Pode fechar o navegador.`);
+  console.log(`\nLogin detectado. Sessão salva em ${SESSION_PATH}.`);
   await browser.close();
   process.exit(0);
 }
