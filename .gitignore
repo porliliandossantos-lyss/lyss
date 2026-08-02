@@ -3,4 +3,5 @@ node_modules/
 output/
 voice-engine/
 tiktok-session.json
+youtube-token.json
 *.log
