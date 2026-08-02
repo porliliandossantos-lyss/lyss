@@ -12,15 +12,22 @@ import { chromium } from "playwright";
 import path from "node:path";
 
 const SESSION_PATH = path.resolve(import.meta.dirname, "..", "tiktok-session.json");
-const TIMEOUT_MS = 5 * 60 * 1000;
+const TIMEOUT_MS = 15 * 60 * 1000;
 const SESSION_COOKIE_NAMES = ["sessionid", "sid_tt", "sessionid_ss"];
 
-async function waitForLogin(context) {
+async function waitForLogin(context, page) {
   const start = Date.now();
+  let lastPrint = 0;
   while (Date.now() - start < TIMEOUT_MS) {
     const cookies = await context.cookies("https://www.tiktok.com");
     if (cookies.some((c) => SESSION_COOKIE_NAMES.includes(c.name) && c.value)) {
       return true;
+    }
+    const elapsed = Date.now() - start;
+    if (elapsed - lastPrint > 30000) {
+      lastPrint = elapsed;
+      const secondsLeft = Math.round((TIMEOUT_MS - elapsed) / 1000);
+      console.log(`  ainda esperando o login... (${secondsLeft}s restantes, página atual: ${page.url()})`);
     }
     await new Promise((r) => setTimeout(r, 2000));
   }
@@ -36,7 +43,7 @@ async function main() {
   const page = await context.newPage();
   await page.goto("https://www.tiktok.com/login");
 
-  const loggedIn = await waitForLogin(context);
+  const loggedIn = await waitForLogin(context, page);
 
   if (!loggedIn) {
     console.log("\nTempo esgotado (5 min) sem detectar login. Rode de novo quando quiser tentar.");
