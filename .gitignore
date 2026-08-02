@@ -3,5 +3,6 @@ node_modules/
 output/
 voice-engine/
 tiktok-session.json
+tiktok-chrome-profile/
 youtube-token.json
 *.log
