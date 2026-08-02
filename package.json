@@ -10,7 +10,7 @@
     "dev": "node --watch src/server/index.js",
     "setup:voice": "node scripts/setup-voice.js",
     "test:pipeline": "node scripts/test-pipeline.js",
-    "tiktok:login": "node scripts/tiktok-login.js"
+    "tiktok:verify": "node scripts/tiktok-verify-session.js"
   },
   "dependencies": {
     "express": "^4.19.2",
