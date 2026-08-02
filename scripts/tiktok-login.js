@@ -31,7 +31,7 @@ async function main() {
   console.log("Abrindo o navegador — faça login normalmente na sua conta do TikTok.");
   console.log("Assim que o login terminar, o script detecta sozinho e fecha tudo.\n");
 
-  const browser = await chromium.launch({ headless: false });
+  const browser = await chromium.launch({ headless: false, channel: "chrome" });
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto("https://www.tiktok.com/login");
