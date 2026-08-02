@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: lyss
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CONTENT_LANGUAGE
+        value: en
+      - key: DEFAULT_NICHE
+        value: curiosities
+      - key: GOAL_FOLLOWERS_TARGET
+        value: "1000"
+      - key: GOAL_DEADLINE
+        value: "2026-09-30"

@@ -40,7 +40,18 @@ ainda não implementado, é o próximo passo depois que o pipeline de conteúdo 
 Isso está fora dos Termos de Uso da TikTok (não existe alternativa oficial pra isso hoje) —
 decisão já tomada e registrada: autonomia total em troca do risco de restrição de conta.
 
-## Deploy
+## Deploy no Render
 
-Pensado para rodar 24/7 fora da sua máquina (Render, com sua conta separada) quando a etapa
-de automação do TikTok estiver pronta. Local serve bem pra desenvolver e testar.
+O repositório já tem `render.yaml` pronto (Render detecta sozinho). Passos que só você
+pode fazer (login/OAuth):
+
+1. Crie a conta em [render.com](https://render.com) com o e-mail separado.
+2. No painel, **New + → Blueprint**, conecte sua conta do GitHub (autoriza o app do Render)
+   e selecione o repositório `lyss`.
+3. Render vai ler o `render.yaml` sozinho e propor o serviço "lyss" (plano free).
+4. Antes de confirmar, ele vai pedir a variável `GROQ_API_KEY` (fica marcada como secreta,
+   não vem do repositório) — cole sua chave da Groq ali, direto no site do Render.
+5. Deploy. A cada `git push`, o Render atualiza sozinho.
+
+Hoje isso publica o painel + o pipeline de conteúdo. A automação de postar/responder no
+TikTok ainda não está implementada (ver seção acima) — quando estiver, sobe pelo mesmo fluxo.
