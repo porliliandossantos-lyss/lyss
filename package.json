@@ -1,0 +1,22 @@
+{
+  "name": "lyss",
+  "version": "0.1.0",
+  "description": "IA autonoma de conteudo para TikTok — roteiro (Groq), voz (Piper local) e orquestracao.",
+  "private": true,
+  "type": "module",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "node src/server/index.js",
+    "dev": "node --watch src/server/index.js",
+    "setup:voice": "node scripts/setup-voice.js",
+    "test:pipeline": "node scripts/test-pipeline.js",
+    "tiktok:login": "node scripts/tiktok-login.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
