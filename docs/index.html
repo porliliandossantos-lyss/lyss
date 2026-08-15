@@ -6,17 +6,46 @@
 <style>
   body { font-family: system-ui, sans-serif; max-width: 720px; margin: 60px auto; padding: 0 20px; color: #1b1230; line-height: 1.6; }
   h1 { margin-bottom: 4px; }
-  ul { padding-left: 20px; }
+  .tagline { color: #6C4FD9; font-weight: 600; margin-top: 0; }
+  h2 { margin-top: 40px; font-size: 20px; }
+  ol, ul { padding-left: 20px; }
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #eee; font-size: 14px; color: #666; }
+  footer a { color: #6C4FD9; }
 </style>
 </head>
 <body>
   <h1>Lyss</h1>
-  <p>Lyss is a personal content automation tool, used by its developer to create and publish
-  short-form videos to her own social media accounts.</p>
+  <p class="tagline">A personal content automation assistant for short-form video.</p>
 
+  <p>Lyss is a private tool built and operated by a single individual creator to help manage her
+  own short-form video presence. It is not a public product or a multi-user service — it has one
+  owner, and it only ever acts on that owner's own social media accounts, which she authorizes
+  herself through each platform's official login flow.</p>
+
+  <h2>What it does</h2>
+  <p>Lyss automates the repetitive parts of running a content channel end to end:</p>
+  <ol>
+    <li>Generates a video idea and script for the owner's chosen niche.</li>
+    <li>Turns the script into narration using a local text-to-speech voice.</li>
+    <li>Renders a finished short-form video (captions, background footage, and optional music).</li>
+    <li>Publishes the video to the owner's own account using each platform's official API — on
+    TikTok, that means TikTok Login Kit for authentication and the Content Posting API
+    (<code>video.publish</code>) to publish directly to the profile that authorized it.</li>
+  </ol>
+
+  <h2>Who operates it</h2>
+  <p>Lyss is developed and run by an independent creator for her own accounts. There is no
+  sign-up, no other users, and no data shared between accounts — each connected account belongs
+  to the same owner.</p>
+
+  <h2>Legal</h2>
   <ul>
     <li><a href="privacy.html">Privacy Policy</a></li>
     <li><a href="terms.html">Terms of Use</a></li>
   </ul>
+
+  <footer>
+    Source code and contact: <a href="https://github.com/porliliandossantos-lyss/lyss">github.com/porliliandossantos-lyss/lyss</a>
+  </footer>
 </body>
 </html>
