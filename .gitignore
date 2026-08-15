@@ -1,8 +1,14 @@
 node_modules/
 .env
 output/
-voice-engine/
 tiktok-session.json
-tiktok-chrome-profile/
+tiktok-dedicated-profile/
+buffer-dedicated-profile/
 youtube-token.json
+tiktok-token.json
+tiktok-sandbox-token.json
 *.log
+music/*.mp3
+music/*.wav
+music/*.m4a
+music/*.ogg
