@@ -1,20 +1,21 @@
-// Sobe um vídeo gerado pela Lyss como RASCUNHO no Buffer (nunca agenda/publica
-// sozinho) — plano gratuito do Buffer não tem API, então isso reproduz pelo
-// navegador o mesmo upload que você faria na mão. Você aprova depois pelo
-// app do Buffer no celular, e só a partir daí ele publica de verdade.
+// Sobe um vídeo gerado pela Lyss como "Idea" no quadro Create > Ideas do
+// Buffer -- NUNCA agenda/publica sozinho. Você aprova depois abrindo a ideia
+// no Buffer (app ou site) e convertendo em post manualmente.
 //
-// AVISO: os seletores abaixo são um primeiro palpite, escritos sem ter visto
-// a tela real logada do Buffer (a conta ainda não existia quando isso foi
-// escrito). Bem provável que precise ajustar ao vivo assim que houver uma
-// conta de teste — mesma coisa que aconteceu várias vezes com
-// src/tiktok/poster.js até ele funcionar de verdade. Os screenshots em
-// output/debug-steps/ (stepShot) existem justamente pra facilitar esse ajuste.
+// Mapeado ao vivo em 15/08/2026, navegando na conta real logada: o plano
+// gratuito do Buffer NÃO tem um botão "Save as Draft" no Composer normal --
+// fechar o Composer sem agendar simplesmente descarta tudo (confirmado:
+// "0 posts scheduled" depois de fechar). O mecanismo real de "guardar sem
+// publicar" nesse plano é o quadro Create > Ideas (/create/ideas):
+// "New Idea" abre um modal com um campo de título/texto, uma zona de
+// upload de mídia, e dois botões -- "Create Post" (seguiria pro Composer de
+// agendamento) e "Save Idea" (o que usamos aqui, sem tocar em nenhuma rede).
 
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { launchBufferContext } from "./browser.js";
 
-const COMPOSE_URL = "https://publish.buffer.com/";
+const IDEAS_URL = "https://publish.buffer.com/create/ideas?view=board";
 const OUTPUT_DIR = path.resolve(import.meta.dirname, "..", "..", "output");
 const DEBUG_STEPS_DIR = path.join(OUTPUT_DIR, "debug-steps");
 let stepCounter = 0;
@@ -35,39 +36,37 @@ export async function saveDraftToBuffer({ videoPath, caption }) {
   const context = await launchBufferContext({ headless: false });
   try {
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto(COMPOSE_URL, { waitUntil: "domcontentloaded" });
-    await stepShot(page, "painel-aberto");
+    await page.goto(IDEAS_URL, { waitUntil: "domcontentloaded" });
+    await stepShot(page, "quadro-ideas-aberto");
 
-    // "Create Post" / "New Post" -- texto exato ainda não confirmado ao vivo.
-    const newPostBtn = page.getByRole("button", { name: /create post|new post/i }).first();
-    await newPostBtn.waitFor({ state: "visible", timeout: 30000 });
-    await newPostBtn.click();
-    await stepShot(page, "compositor-aberto");
+    const newIdeaBtn = page.getByRole("button", { name: "New Idea" }).first();
+    await newIdeaBtn.waitFor({ state: "visible", timeout: 30000 });
+    await newIdeaBtn.click();
+    await stepShot(page, "modal-nova-ideia-aberto");
 
-    // Por padrão, seleciona TODOS os canais conectados (o composer do Buffer
-    // normalmente já vem com todos marcados) -- não escolhe um específico,
-    // já que o plano gratuito só permite 3 canais no total mesmo.
-    const fileInput = page.locator('input[type="file"]').first();
-    await fileInput.waitFor({ state: "attached", timeout: 30000 });
-    await fileInput.setInputFiles(videoPath);
-    await stepShot(page, "video-selecionado");
-
-    // Espera o upload/processamento do vídeo terminar antes de digitar --
-    // tempo generoso de propósito, vídeo pode levar um tempo pra processar.
-    await page.waitForTimeout(5000);
-    await stepShot(page, "apos-espera-processamento");
-
-    const captionBox = page.locator('[contenteditable="true"], textarea').first();
-    await captionBox.click();
+    // O placeholder desse campo é um texto de dica ROTATIVO ("Once upon a
+    // time...", "Everything begins with an idea...", etc. -- confirmado ao
+    // vivo, muda a cada abertura do modal) -- não dá pra usar getByPlaceholder
+    // com texto fixo. É um contenteditable logo abaixo do título "Give your
+    // idea a title", primeiro (e único, nesse modal) da tela.
+    const titleBox = page.locator('[contenteditable="true"]').first();
+    await titleBox.waitFor({ state: "visible", timeout: 15000 });
+    await titleBox.click();
     await page.keyboard.type(caption, { delay: 15 });
     await stepShot(page, "legenda-digitada");
 
-    // "Save as Draft" -- nunca "Add to Queue"/"Schedule", que publicaria
-    // sozinho sem sua aprovação pelo celular.
-    const saveDraftBtn = page.getByRole("button", { name: /save as draft|save draft/i });
-    await saveDraftBtn.waitFor({ state: "visible", timeout: 15000 });
-    await saveDraftBtn.click();
-    await stepShot(page, "salvou-rascunho");
+    const fileInput = page.locator('input[type="file"]').first();
+    await fileInput.waitFor({ state: "attached", timeout: 15000 });
+    await fileInput.setInputFiles(videoPath);
+    // Espera o vídeo terminar de subir/processar antes de salvar.
+    await page.waitForTimeout(6000);
+    await stepShot(page, "video-anexado");
+
+    const saveIdeaBtn = page.getByRole("button", { name: "Save Idea" });
+    await saveIdeaBtn.waitFor({ state: "visible", timeout: 15000 });
+    await saveIdeaBtn.click({ force: true });
+    await page.waitForTimeout(2000);
+    await stepShot(page, "ideia-salva");
 
     return { saved: true };
   } finally {
